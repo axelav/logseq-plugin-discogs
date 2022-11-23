@@ -11,7 +11,7 @@ const handleResponse = async (res: Response) => {
   }
 }
 
-const fetchData = async (e: { uuid: string }) => {
+const fetchReleaseData = async (e: { uuid: string }) => {
   const query = (await logseq.Editor.getBlock(e.uuid))?.content.split('\n')[0]
 
   if (query) {
@@ -73,7 +73,7 @@ const main = () => {
     'Query discogs.com API',
     async (e) => {
       console.log('logseq-discogs-plugin :: Fetching results...')
-      await fetchData(e)
+      await fetchReleaseData(e)
     }
   )
 }
