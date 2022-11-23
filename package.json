@@ -1,5 +1,5 @@
 {
-  "name": "logseq-discogs-plugin",
+  "name": "logseq-plugin-discogs",
   "version": "0.1.0",
   "description": "Query discogs.com API for album data",
   "main": "dist/index.html",
@@ -10,14 +10,15 @@
     "build": "parcel build src/index.html --public-url ./"
   },
   "keywords": [],
-  "author": "Axel Anderson",
+  "author": "axelav",
   "license": "ISC",
   "dependencies": {
     "@logseq/libs": "^0.0.10"
   },
   "logseq": {
-    "id": "logseq-discogs-plugin",
-    "title": "logseq-discogs-plugin"
+    "id": "logseq-plugin-discogs",
+    "title": "Query Discogs",
+    "icon": "./icon.png"
   },
   "devDependencies": {
     "parcel": "^2.7.0"
