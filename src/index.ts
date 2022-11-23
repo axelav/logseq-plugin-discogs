@@ -19,7 +19,7 @@ const fetchReleaseData = async (e: { uuid: string }) => {
       const res = await fetch(`https://www.honkytonk.in/api/discogs?q=${query}`)
       const release = await handleResponse(res)
 
-      if (!release) {
+      if (!release.title && release.message) {
         return logseq.UI.showMsg('logseq-discogs-plugin :: No results!')
       }
 
