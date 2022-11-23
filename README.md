@@ -2,7 +2,7 @@
 
 https://gitlab.com/axelav/logseq-plugin-discogs
 
-Query the discogs.com API from your graph.
+Query the [discogs.com](https://discogs.com) API for album data and write it to your logseq graph
 
 ![screencast](./screencast.gif)
 

@@ -1,7 +1,7 @@
 {
   "name": "logseq-plugin-discogs",
   "version": "0.1.0",
-  "description": "Query discogs.com API for album data",
+  "description": "Query discogs.com API for album data and write it to your logseq graph",
   "main": "dist/index.html",
   "targets": {
     "main": false
