@@ -13,19 +13,24 @@ const handleResponse = async (res: Response) => {
 
 const fetchReleaseData = async (e: { uuid: string }) => {
   const query = (await logseq.Editor.getBlock(e.uuid))?.content.split('\n')[0]
+  const cleanedQuery = query.replace('–', '')
+
+  console.log(`logseq-discogs-plugin :: Fetching results for ${cleanedQuery}`)
 
   if (query) {
     try {
-      const res = await fetch(`https://www.honkytonk.in/api/discogs?q=${query}`)
+      const res = await fetch(`https://www.honkytonk.in/api/discogs?q=${cleanedQuery}`)
       const release = await handleResponse(res)
 
       if (!release.title && release.message) {
         return logseq.UI.showMsg('logseq-discogs-plugin :: No results!')
       }
 
-      addRelease(release, e.uuid)
+      return addRelease(release, e.uuid)
     } catch (err) {
       console.error('logseq-discogs-plugin :: Error: ', err)
+
+      return logseq.UI.showMsg('logseq-discogs-plugin :: Error! Check for any special characters in your block and remove them, then try again.', 'error')
     }
   }
 }
@@ -54,7 +59,7 @@ const addRelease = async (release: Release, srcBlock: BlockIdentity) => {
           content: `record-label:: [[${label}]]`,
         },
         {
-          content: `tags:: ${tags.join(', ')}`,
+          content: `tags:: albums, ${tags.join(', ')}`,
         },
         {
           content: `url:: ${release.url}`,
@@ -72,7 +77,6 @@ const main = () => {
   logseq.Editor.registerBlockContextMenuItem(
     'Query discogs.com API',
     async (e) => {
-      console.log('logseq-discogs-plugin :: Fetching results...')
       await fetchReleaseData(e)
     }
   )
