@@ -19,7 +19,9 @@ const fetchReleaseData = async (e: { uuid: string }) => {
 
   if (query) {
     try {
-      const res = await fetch(`https://www.honkytonk.in/api/discogs?q=${cleanedQuery}`)
+      const res = await fetch(
+        `https://www.honkytonk.in/api/discogs?q=${cleanedQuery}`
+      )
       const release = await handleResponse(res)
 
       if (!release.title && release.message) {
@@ -30,7 +32,10 @@ const fetchReleaseData = async (e: { uuid: string }) => {
     } catch (err) {
       console.error('logseq-discogs-plugin :: Error: ', err)
 
-      return logseq.UI.showMsg('logseq-discogs-plugin :: Error! Check for any special characters in your block and remove them, then try again.', 'error')
+      return logseq.UI.showMsg(
+        'logseq-discogs-plugin :: Error! Check for any special characters in your block and remove them, then try again.',
+        'error'
+      )
     }
   }
 }
@@ -59,7 +64,9 @@ const addRelease = async (release: Release, srcBlock: BlockIdentity) => {
           content: `record-label:: [[${label}]]`,
         },
         {
-          content: `tags:: albums, ${tags.join(', ')}`,
+          content: `tags:: albums, ${tags
+            .map((t) => (t.indexOf(',') !== -1 ? `[[${t}]]` : t))
+            .join(', ')}`,
         },
         {
           content: `url:: ${release.url}`,
