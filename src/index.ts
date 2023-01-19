@@ -1,5 +1,41 @@
 import '@logseq/libs'
-import { BlockIdentity } from '@logseq/libs/dist/LSPlugin.user'
+import {
+  BlockIdentity,
+  SettingSchemaDesc,
+} from '@logseq/libs/dist/LSPlugin.user'
+
+let settings: SettingSchemaDesc[] = [
+  {
+    key: 'includeEmptyBlock',
+    type: 'boolean',
+    title: 'Include an empty block in output?',
+    description: 'Useful for notes, `rating::` properties, etc.',
+    default: true,
+  },
+
+  {
+    key: 'includeRecordLabel',
+    type: 'boolean',
+    title: 'Include a `record-label::` property in output?',
+    description: 'Inserts a page link to the record label of the release.',
+    default: true,
+  },
+  {
+    key: 'includeTags',
+    type: 'boolean',
+    title: 'Include a `tags::` property in output?',
+    description:
+      'Inserts a list of "styles" and "genres" data from discogs.com.',
+    default: true,
+  },
+  {
+    key: 'includeUrl',
+    type: 'boolean',
+    title: 'Include a `url::` property in output?',
+    description: 'Inserts a URL to the release on discogs.com.',
+    default: true,
+  },
+]
 
 const handleResponse = async (res: Response) => {
   if (!res.ok) {
@@ -13,11 +49,11 @@ const handleResponse = async (res: Response) => {
 
 const fetchReleaseData = async (e: { uuid: string }) => {
   const query = (await logseq.Editor.getBlock(e.uuid))?.content.split('\n')[0]
-  const cleanedQuery = query.replace('–', '')
+  const cleanedQuery = query?.replace('–', '')
 
   console.log(`logseq-discogs-plugin :: Fetching results for ${cleanedQuery}`)
 
-  if (query) {
+  if (cleanedQuery) {
     try {
       const res = await fetch(
         `https://www.honkytonk.in/api/discogs?q=${cleanedQuery}`
@@ -51,27 +87,39 @@ interface Release {
 
 const addRelease = async (release: Release, srcBlock: BlockIdentity) => {
   const { artist, title, year, tags, label } = release
-  const mainText = `${artist}, *${title}* ([[${year}]])`
+
+  const children: { content: string }[] = []
+
+  if (logseq.settings?.includeEmptyBlock) {
+    children.push({
+      content: '',
+    })
+  }
+
+  if (logseq.settings?.includeRecordLabel) {
+    children.push({
+      content: `record-label:: [[${label}]]`,
+    })
+  }
+
+  if (logseq.settings?.includeTags) {
+    children.push({
+      content: `tags:: albums, ${tags
+        .map((t) => (t.indexOf(',') !== -1 ? `[[${t}]]` : t))
+        .join(', ')}`,
+    })
+  }
+
+  if (logseq.settings?.includeUrl) {
+    children.push({
+      content: `url:: ${release.url}`,
+    })
+  }
 
   await logseq.Editor.insertBatchBlock(srcBlock, [
     {
-      content: mainText,
-      children: [
-        {
-          content: 'rating:: ',
-        },
-        {
-          content: `record-label:: [[${label}]]`,
-        },
-        {
-          content: `tags:: albums, ${tags
-            .map((t) => (t.indexOf(',') !== -1 ? `[[${t}]]` : t))
-            .join(', ')}`,
-        },
-        {
-          content: `url:: ${release.url}`,
-        },
-      ],
+      content: `${artist}, *${title}* ([[${year}]])`,
+      children,
     },
   ])
 
@@ -80,6 +128,8 @@ const addRelease = async (release: Release, srcBlock: BlockIdentity) => {
 
 const main = () => {
   console.log('logseq-discogs-plugin :: Loaded!')
+
+  logseq.useSettingsSchema(settings)
 
   logseq.Editor.registerBlockContextMenuItem(
     'Query discogs.com API',
