@@ -54,11 +54,20 @@ const fetchReleaseData = async (e: { uuid: string }) => {
   console.log(`logseq-discogs-plugin :: Fetching results for ${cleanedQuery}`)
 
   if (cleanedQuery) {
+    const loadingBlock = await logseq.Editor.insertBlock(
+      e.uuid,
+      'Fetching results, please be patient...'
+    )
+
     try {
       const res = await fetch(
         `https://api.val.town/eval/@axelav.discogs?q=${cleanedQuery}`
       )
       const { data } = await handleResponse(res)
+
+      if (loadingBlock) {
+        await logseq.Editor.removeBlock(loadingBlock.uuid)
+      }
 
       if (!data.title) {
         return logseq.UI.showMsg('logseq-discogs-plugin :: No results!')
@@ -66,6 +75,10 @@ const fetchReleaseData = async (e: { uuid: string }) => {
 
       return addRelease(data, e.uuid)
     } catch (err) {
+      if (loadingBlock) {
+        await logseq.Editor.removeBlock(loadingBlock.uuid)
+      }
+
       console.error('logseq-discogs-plugin :: Error: ', err)
 
       return logseq.UI.showMsg(
