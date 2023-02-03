@@ -56,15 +56,15 @@ const fetchReleaseData = async (e: { uuid: string }) => {
   if (cleanedQuery) {
     try {
       const res = await fetch(
-        `https://www.honkytonk.in/api/discogs?q=${cleanedQuery}`
+        `https://api.val.town/eval/@axelav.discogs?q=${cleanedQuery}`
       )
-      const release = await handleResponse(res)
+      const { data } = await handleResponse(res)
 
-      if (!release.title && release.message) {
+      if (!data.title) {
         return logseq.UI.showMsg('logseq-discogs-plugin :: No results!')
       }
 
-      return addRelease(release, e.uuid)
+      return addRelease(data, e.uuid)
     } catch (err) {
       console.error('logseq-discogs-plugin :: Error: ', err)
 
