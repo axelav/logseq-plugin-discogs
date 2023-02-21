@@ -35,6 +35,13 @@ let settings: SettingSchemaDesc[] = [
     description: 'Inserts a URL to the release on discogs.com.',
     default: true,
   },
+  {
+    key: 'enableSlashCommand',
+    type: 'boolean',
+    title: 'Enable slash command?',
+    description: 'Enable the "Query discogs.com API" slash command.',
+    default: true,
+  },
 ]
 
 const handleResponse = async (res: Response) => {
@@ -150,6 +157,16 @@ const main = () => {
       await fetchReleaseData(e)
     }
   )
+
+  if (logseq.settings?.enableSlashCommand) {
+    logseq.Editor.registerSlashCommand('Query discogs.com API', async () => {
+      const e = await logseq.Editor.getCurrentBlock()
+
+      if (e) {
+        await fetchReleaseData(e)
+      }
+    })
+  }
 }
 
 logseq.ready(main).catch(console.error)
