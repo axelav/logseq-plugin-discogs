@@ -68,9 +68,9 @@ const fetchReleaseData = async (e: { uuid: string }) => {
 
     try {
       const res = await fetch(
-        `https://api.val.town/eval/@axelav.discogs?q=${cleanedQuery}`
+        `https://axelav-honkytonkin.deno.dev/api/discogs?q=${cleanedQuery}`
       )
-      const { data } = await handleResponse(res)
+      const data = await handleResponse(res)
 
       if (loadingBlock) {
         await logseq.Editor.removeBlock(loadingBlock.uuid)
