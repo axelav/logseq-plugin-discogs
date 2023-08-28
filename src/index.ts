@@ -68,7 +68,7 @@ const fetchReleaseData = async (e: { uuid: string }) => {
 
     try {
       const res = await fetch(
-        `https://axelav-honkytonkin.deno.dev/api/discogs?q=${cleanedQuery}`
+        `https://endpoints.deno.dev/discogs?q=${cleanedQuery}`
       )
       const data = await handleResponse(res)
 
