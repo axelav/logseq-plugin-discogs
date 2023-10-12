@@ -56,7 +56,7 @@ const handleResponse = async (res: Response) => {
 
 const fetchReleaseData = async (e: { uuid: string }) => {
   const query = (await logseq.Editor.getBlock(e.uuid))?.content.split('\n')[0]
-  const cleanedQuery = query?.replace('–', '')
+  const cleanedQuery = query?.replace('–', '').replace('&', 'and').trim()
 
   console.log(`logseq-discogs-plugin :: Fetching results for ${cleanedQuery}`)
 
