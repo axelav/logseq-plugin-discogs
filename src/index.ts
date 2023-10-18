@@ -120,10 +120,25 @@ const addRelease = async (release: Release, srcBlock: BlockIdentity) => {
     .join(', ')}`
 
   if (logseq.settings?.useSingleBlock) {
-    await logseq.Editor.updateBlock(
-      srcBlock,
-      `${artist}, *${title}* ([[${year}]])\nrating::\nrecord-label:: [[${label}]]\ntags:: ${tagsJoined}\nurl:: ${release.url}`
-    )
+    let content = `${artist}, *${title}* ([[${year}]])`
+
+    if (logseq.settings?.includeEmptyBlock) {
+      content = content.concat('\nrating:: ')
+    }
+
+    if (logseq.settings?.includeRecordLabel) {
+      content = content.concat(`\nrecord-label:: [[${label}]]`)
+    }
+
+    if (logseq.settings?.includeTags) {
+      content = content.concat(`\ntags:: ${tagsJoined}`)
+    }
+
+    if (logseq.settings?.includeUrl) {
+      content = content.concat(`\nurl:: ${release.url}`)
+    }
+
+    await logseq.Editor.updateBlock(srcBlock, content)
   } else {
     const children: { content: string }[] = []
 
