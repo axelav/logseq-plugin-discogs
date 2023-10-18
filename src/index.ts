@@ -120,13 +120,10 @@ const addRelease = async (release: Release, srcBlock: BlockIdentity) => {
     .join(', ')}`
 
   if (logseq.settings?.useSingleBlock) {
-    await logseq.Editor.insertBatchBlock(srcBlock, [
-      {
-        content: `${artist}, *${title}* ([[${year}]])\nrating::\nrecord-label:: [[${label}]]\ntags:: ${tagsJoined}\nurl:: ${release.url}`,
-      },
-    ])
-
-    await logseq.Editor.removeBlock(srcBlock)
+    await logseq.Editor.updateBlock(
+      srcBlock,
+      `${artist}, *${title}* ([[${year}]])\nrating::\nrecord-label:: [[${label}]]\ntags:: ${tagsJoined}\nurl:: ${release.url}`
+    )
   } else {
     const children: { content: string }[] = []
 
@@ -144,9 +141,7 @@ const addRelease = async (release: Release, srcBlock: BlockIdentity) => {
 
     if (logseq.settings?.includeTags) {
       children.push({
-        content: `tags:: albums, ${tags
-          .map((t) => (t.indexOf(',') !== -1 ? `[[${t}]]` : t))
-          .join(', ')}`,
+        content: `tags:: ${tagsJoined}`,
       })
     }
 
