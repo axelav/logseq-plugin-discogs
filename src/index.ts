@@ -6,13 +6,20 @@ import {
 
 let settings: SettingSchemaDesc[] = [
   {
+    key: 'useSingleBlock',
+    type: 'boolean',
+    title: 'Use a single block for output?',
+    description:
+      'Write all output to a single block instead of one for each property.',
+    default: false,
+  },
+  {
     key: 'includeEmptyBlock',
     type: 'boolean',
     title: 'Include an empty block in output?',
     description: 'Useful for notes, `rating::` properties, etc.',
     default: true,
   },
-
   {
     key: 'includeRecordLabel',
     type: 'boolean',
@@ -108,42 +115,56 @@ interface Release {
 const addRelease = async (release: Release, srcBlock: BlockIdentity) => {
   const { artist, title, year, tags, label } = release
 
-  const children: { content: string }[] = []
+  const tagsJoined = `albums, ${tags
+    .map((t) => (t.indexOf(',') !== -1 ? `[[${t}]]` : t))
+    .join(', ')}`
 
-  if (logseq.settings?.includeEmptyBlock) {
-    children.push({
-      content: '',
-    })
+  if (logseq.settings?.useSingleBlock) {
+    await logseq.Editor.insertBatchBlock(srcBlock, [
+      {
+        content: `${artist}, *${title}* ([[${year}]])\nrating::\nrecord-label:: [[${label}]]\ntags:: ${tagsJoined}\nurl:: ${release.url}`,
+      },
+    ])
+
+    await logseq.Editor.removeBlock(srcBlock)
+  } else {
+    const children: { content: string }[] = []
+
+    if (logseq.settings?.includeEmptyBlock) {
+      children.push({
+        content: '',
+      })
+    }
+
+    if (logseq.settings?.includeRecordLabel) {
+      children.push({
+        content: `record-label:: [[${label}]]`,
+      })
+    }
+
+    if (logseq.settings?.includeTags) {
+      children.push({
+        content: `tags:: albums, ${tags
+          .map((t) => (t.indexOf(',') !== -1 ? `[[${t}]]` : t))
+          .join(', ')}`,
+      })
+    }
+
+    if (logseq.settings?.includeUrl) {
+      children.push({
+        content: `url:: ${release.url}`,
+      })
+    }
+
+    await logseq.Editor.insertBatchBlock(srcBlock, [
+      {
+        content: `${artist}, *${title}* ([[${year}]])`,
+        children,
+      },
+    ])
+
+    await logseq.Editor.removeBlock(srcBlock)
   }
-
-  if (logseq.settings?.includeRecordLabel) {
-    children.push({
-      content: `record-label:: [[${label}]]`,
-    })
-  }
-
-  if (logseq.settings?.includeTags) {
-    children.push({
-      content: `tags:: albums, ${tags
-        .map((t) => (t.indexOf(',') !== -1 ? `[[${t}]]` : t))
-        .join(', ')}`,
-    })
-  }
-
-  if (logseq.settings?.includeUrl) {
-    children.push({
-      content: `url:: ${release.url}`,
-    })
-  }
-
-  await logseq.Editor.insertBatchBlock(srcBlock, [
-    {
-      content: `${artist}, *${title}* ([[${year}]])`,
-      children,
-    },
-  ])
-
-  await logseq.Editor.removeBlock(srcBlock)
 }
 
 const main = () => {
